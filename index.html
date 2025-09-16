@@ -1,0 +1,31 @@
+
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Helpdesk Demo</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 2em; background: #f4f4f4; }
+        .container { background: white; padding: 2em; border-radius: 8px; max-width: 600px; margin: auto; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+        h2 { color: #333; }
+        .info { font-size: 1.2em; color: #0077cc; margin-bottom: 1em; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Inkomend gesprek</h2>
+        <div class="info">Telefoonnummer: <span id="phone">Onbekend</span></div>
+        <div class="info">Klantnummer: <span id="klant">Onbekend</span></div>
+        <p>Simulatie van klantinformatie of ticketinterface.</p>
+    </div>
+
+    <script>
+        const params = new URLSearchParams(window.location.search);
+        const phone = params.get("phone") || "Onbekend";
+        const klant = params.get("klant") || "Onbekend";
+        document.getElementById("phone").textContent = phone;
+        document.getElementById("klant").textContent = klant;
+    </script>
+</body>
+</html>
