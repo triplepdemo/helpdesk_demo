@@ -6,10 +6,30 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Helpdesk Demo</title>
     <style>
-        body { font-family: Arial, sans-serif; padding: 2em; background: #f4f4f4; }
-        .container { background: white; padding: 2em; border-radius: 8px; max-width: 600px; margin: auto; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+        body {
+            font-family: Arial, sans-serif;
+            padding: 2em;
+            background: #f4f4f4;
+        }
+        .container {
+            background: white;
+            padding: 2em;
+            border-radius: 8px;
+            max-width: 600px;
+            margin: auto;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
         h2 { color: #333; }
-        .info { font-size: 1.2em; color: #0077cc; margin-bottom: 1em; }
+        .info {
+            font-size: 1.2em;
+            color: #0077cc;
+            margin-bottom: 1em;
+        }
+        a.tel-link {
+            color: #0077cc;
+            text-decoration: none;
+            font-weight: bold;
+        }
     </style>
 </head>
 <body>
@@ -24,8 +44,22 @@
         const params = new URLSearchParams(window.location.search);
         const phone = params.get("phone") || "Onbekend";
         const klant = params.get("klant") || "Onbekend";
-        document.getElementById("phone").textContent = phone;
+
+        // Toon klantnummer
         document.getElementById("klant").textContent = klant;
+
+        // Maak telefoonnummer klikbaar als tel-link
+        const phoneSpan = document.getElementById("phone");
+        if (phone !== "Onbekend") {
+            const link = document.createElement("a");
+            link.href = `tel:${phone}`;
+            link.textContent = phone;
+            link.className = "tel-link";
+            phoneSpan.textContent = ""; // leegmaken
+            phoneSpan.appendChild(link);
+        } else {
+            phoneSpan.textContent = phone;
+        }
     </script>
 </body>
 </html>
