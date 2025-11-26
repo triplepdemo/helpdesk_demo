@@ -52,7 +52,7 @@
         const phoneSpan = document.getElementById("phone");
         if (phone !== "Onbekend") {
             const link = document.createElement("a");
-            link.href = `tel:${phone}`;
+            link.href = `tel:+${phone}`;
             link.textContent = phone;
             link.className = "tel-link";
             phoneSpan.textContent = ""; // leegmaken
