@@ -1,1 +1,76 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+<title>Helpdesk Dashboard</title>
+
+<style>
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+}
+
+.tabs {
+    display: flex;
+    background: #0078d4;
+}
+
+.tab {
+    padding: 14px 20px;
+    color: white;
+    cursor: pointer;
+}
+
+.tab.active {
+    background: #005a9e;
+    font-weight: bold;
+}
+
+iframe {
+    width: 100%;
+    height: calc(100vh - 48px);
+    border: none;
+}
+</style>
+</head>
+
+<body>
+
+<div class="tabs">
+    <div class="tab active" onclick="openTab(1,this)">Helpdesk</div>
+    <div class="tab" onclick="openTab(2,this)">Tweede Pagina</div>
+</div>
+
+<iframe id="contentFrame"></iframe>
+
+<script>
+
+// neem alle parameters uit de URL over
+const queryString = window.location.search;
+
+// voorlopig dezelfde pagina voor beide tabs
+const pages = {
+    1: "index.html" + queryString,
+    2: "index.html" + queryString
+};
+
+function openTab(id, element) {
+
+    document.querySelectorAll('.tab').forEach(tab => {
+        tab.classList.remove('active');
+    });
+
+    element.classList.add('active');
+
+    document.getElementById('contentFrame').src = pages[id];
+}
+
+// standaard eerste tab openen
+document.getElementById('contentFrame').src = pages[1];
+
+</script>
+
+</body>
+</html>
