@@ -55,7 +55,7 @@ iframe {
 <body>
 
 <div class="tabs">
-    <div class="tab active" onclick="openTab(1,this)">Helpdesk</div>
+    <div class="tab active" onclick="openTab(1,this)">Call History</div>
     <div class="tab" onclick="openTab(2,this)">CRM</div>
     <div class="tab" onclick="openTab(3,this)">Terugbelverzoek</div>
 
@@ -81,8 +81,14 @@ const contactID = params.get("contactID") || "";
 // Pagina's voor de tabs
 const pages = {
 
-    // Bestaande helpdesk pagina
-    1: "index.html" + queryString,
+        // Pagina's voor de tabs
+const pages = {
+
+    // Voca Call History
+    1: "https://cb913p73-8000.euw.devtunnels.ms/agent?ani="
+       + encodeURIComponent("+" + phone)
+       + "&exp=1794937821"
+       + "&sig=d257cb1fda8104fea6ae352a9149f67c",
 
     // HubSpot - contactID wordt dynamisch ingevuld
     2: "https://app-eu1.hubspot.com/embed/144113300/0-1/"
