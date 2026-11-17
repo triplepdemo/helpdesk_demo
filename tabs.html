@@ -75,6 +75,8 @@ const queryString = window.location.search;
 const params = new URLSearchParams(queryString);
 
 const phone = params.get("phone") || "";
+const klant = params.get("klant") || "";
+const contactID = params.get("contactID") || "";
 
 // Pagina's voor de tabs
 const pages = {
@@ -82,11 +84,14 @@ const pages = {
     // Bestaande helpdesk pagina
     1: "index.html" + queryString,
 
-    // HubSpot
-    2: "https://app-eu1.hubspot.com/embed/144113300/0-1/10238801382/timeline",
+    // HubSpot - contactID wordt dynamisch ingevuld
+    2: "https://app-eu1.hubspot.com/embed/144113300/0-1/"
+       + encodeURIComponent(contactID)
+       + "/timeline",
 
     // Power App terugbelverzoek
-    3: "https://apps.powerapps.com/play/e/default-b3ad26bd-8476-47a7-b26e-606968902e27/a/ae0f161c-1ae9-4bbc-9f0b-5df6b97d2766?tenantId=b3ad26bd-8476-47a7-b26e-606968902e27&hint=b4385edd-e506-4bd2-bd5b-8a549e8dbf9a&sourcetime=1777451307476&phone=" + encodeURIComponent("+" + phone)
+    3: "https://apps.powerapps.com/play/e/default-b3ad26bd-8476-47a7-b26e-606968902e27/a/ae0f161c-1ae9-4bbc-9f0b-5df6b97d2766?tenantId=b3ad26bd-8476-47a7-b26e-606968902e27&hint=b4385edd-e506-4bd2-bd5b-8a549e8dbf9a&sourcetime=1777451307476&phone="
+       + encodeURIComponent("+" + phone)
 
 };
 
