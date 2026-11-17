@@ -52,6 +52,7 @@ iframe {
 </style>
 
 </head>
+
 <body>
 
 <div class="tabs">
@@ -70,60 +71,64 @@ iframe {
 
 <script>
 
-// Alle URL-parameters uitlezen
-const queryString = window.location.search;
-const params = new URLSearchParams(queryString);
+// URL parameters
+const params = new URLSearchParams(window.location.search);
 
-const phone = params.get("phone") || "";
+let phone = params.get("phone") || "";
 const klant = params.get("klant") || "";
 const contactID = params.get("contactID") || "";
 
-// Pagina's voor de tabs
-const pages = {
+// Een + in een querystring kan als spatie binnenkomen.
+// Daarom eerst opschonen.
+phone = phone.trim();
 
-        // Pagina's voor de tabs
+// Zorg dat telefoonnummer precies één + heeft
+if (!phone.startsWith("+")) {
+    phone = "+" + phone;
+}
+
+// Pagina's voor de drie tabs
 const pages = {
 
     // Voca Call History
     1: "https://cb913p73-8000.euw.devtunnels.ms/agent?ani="
-       + encodeURIComponent("+" + phone)
+       + encodeURIComponent(phone)
        + "&exp=1794937821"
        + "&sig=d257cb1fda8104fea6ae352a9149f67c",
 
-    // HubSpot - contactID wordt dynamisch ingevuld
+    // HubSpot
     2: "https://app-eu1.hubspot.com/embed/144113300/0-1/"
        + encodeURIComponent(contactID)
        + "/timeline",
 
     // Power App terugbelverzoek
     3: "https://apps.powerapps.com/play/e/default-b3ad26bd-8476-47a7-b26e-606968902e27/a/ae0f161c-1ae9-4bbc-9f0b-5df6b97d2766?tenantId=b3ad26bd-8476-47a7-b26e-606968902e27&hint=b4385edd-e506-4bd2-bd5b-8a549e8dbf9a&sourcetime=1777451307476&phone="
-       + encodeURIComponent("+" + phone)
-
+       + encodeURIComponent(phone)
 };
 
 function openTab(id, element) {
 
-    document.querySelectorAll('.tab').forEach(tab => {
-        tab.classList.remove('active');
+    document.querySelectorAll(".tab").forEach(tab => {
+        tab.classList.remove("active");
     });
 
-    element.classList.add('active');
+    element.classList.add("active");
 
-    document.getElementById('contentFrame').src = pages[id];
+    document.getElementById("contentFrame").src = pages[id];
 }
 
 function openInNewTab() {
 
     const currentUrl =
-        document.getElementById('contentFrame').src;
+        document.getElementById("contentFrame").src;
 
     if (currentUrl) {
-        window.open(currentUrl, '_blank');
+        window.open(currentUrl, "_blank");
     }
 }
 
-// Standaard eerste tab openen
-document.getElementById('contentFrame').src = pages[1];
+// Standaard Call History openen
+document.getElementById("contentFrame").src = pages[1];
 
 </script>
 
