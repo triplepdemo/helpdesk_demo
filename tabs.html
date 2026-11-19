@@ -56,9 +56,9 @@ iframe {
 <body>
 
 <div class="tabs">
-    <div class="tab active" onclick="openTab(1, this)">Call History</div>
-    <div class="tab" onclick="openTab(2, this)">CRM</div>
-    <div class="tab" onclick="openTab(3, this)">Terugbelverzoek</div>
+    <div class="tab active" onclick="openTab(1,this)">Call History</div>
+    <div class="tab" onclick="openTab(2,this)">CRM</div>
+    <div class="tab" onclick="openTab(3,this)">Terugbelverzoek</div>
 
     <div class="spacer"></div>
 
@@ -71,10 +71,7 @@ iframe {
 
 <script>
 
-// ============================================================
-// PARAMETERS VANUIT VOCA
-// ============================================================
-
+// URL parameters
 const params = new URLSearchParams(window.location.search);
 
 let phone = params.get("phone") || "";
@@ -82,15 +79,16 @@ const klant = params.get("klant") || "";
 const contactID = params.get("contactID") || "";
 
 
-// ============================================================
-// HISTORY URL
+// ------------------------------------------------------------
+// CALL HISTORY URL
 //
-// historyUrl moet de LAATSTE parameter zijn in de Voca URL.
+// Voca kan historyUrl niet URL-encoden.
+// Daarom MOET historyUrl de laatste parameter zijn.
 //
-// Omdat Voca de URL niet kan encodeURIComponent()'en, lezen we
-// alles na &historyUrl= rechtstreeks uit de originele querystring.
-// Hierdoor blijven ?ani=, &exp= en &sig= onderdeel van historyUrl.
-// ============================================================
+// We pakken alles achter &historyUrl=.
+// Hierdoor blijven ?ani=, &exp= en &sig= onderdeel
+// van de originele signed URL.
+// ------------------------------------------------------------
 
 let historyUrl = "";
 
@@ -98,21 +96,68 @@ const historyMarker = "&historyUrl=";
 const historyPosition = window.location.search.indexOf(historyMarker);
 
 if (historyPosition !== -1) {
-
     historyUrl = window.location.search.substring(
         historyPosition + historyMarker.length
     );
+}
 
-    // Decodeer alleen waar nodig.
-    // Als de URL al bruikbaar is, blijft deze gewoon intact.
-    try {
-        historyUrl = decodeURIComponent(historyUrl);
-    } catch (e) {
-        console.log("historyUrl kon niet worden gedecodeerd, originele waarde wordt gebruikt.");
+
+// Een + in een querystring kan als spatie binnenkomen.
+// Daarom eerst opschonen.
+phone = phone.trim();
+
+// Zorg dat telefoonnummer precies één + heeft
+if (!phone.startsWith("+")) {
+    phone = "+" + phone;
+}
+
+
+// Pagina's voor de drie tabs
+const pages = {
+
+    // Voca Call History
+    // Geen hardcoded exp en sig meer.
+    // Gebruik rechtstreeks de signed URL vanuit Voca.
+    1: historyUrl,
+
+    // HubSpot
+    2: "https://app-eu1.hubspot.com/embed/144113300/0-1/"
+       + encodeURIComponent(contactID)
+       + "/timeline",
+
+    // Power App terugbelverzoek
+    3: "https://apps.powerapps.com/play/e/default-b3ad26bd-8476-47a7-b26e-606968902e27/a/ae0f161c-1ae9-4bbc-9f0b-5df6b97d2766?tenantId=b3ad26bd-8476-47a7-b26e-606968902e27&hint=b4385edd-e506-4bd2-bd5b-8a549e8dbf9a&sourcetime=1777451307476&phone="
+       + encodeURIComponent(phone)
+};
+
+
+function openTab(id, element) {
+
+    document.querySelectorAll(".tab").forEach(tab => {
+        tab.classList.remove("active");
+    });
+
+    element.classList.add("active");
+
+    document.getElementById("contentFrame").src = pages[id];
+}
+
+
+function openInNewTab() {
+
+    const currentUrl =
+        document.getElementById("contentFrame").src;
+
+    if (currentUrl) {
+        window.open(currentUrl, "_blank");
     }
 }
 
 
-// ============================================================
-// TELEFOONNUMMER OPSCHONEN
-// ========================================================
+// Standaard Call History openen
+document.getElementById("contentFrame").src = pages[1];
+
+</script>
+
+</body>
+</html>
