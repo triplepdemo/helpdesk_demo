@@ -1,38 +1,262 @@
+
+MinimizeRestoreClose
+Skip to main content
+
+
+Chat
+Cowork
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Jan Engel
+Work
+Jan
+M365 Copilot (Premium) 
+
+
+
+Work IQ
+
+Auto
+
+
+
+
+url werkt
+Mooi, dan weten we dat deze route in jouw HubSpot-omgeving werkt.
+
+Dan kunnen we de logica in tabs.html nu netjes maken:
+
+ContactID gevonden → CRM-tab toont direct de HubSpot timeline.
+Geen ContactID → eigen pagina “Geen klant gevonden” in de CRM-tab.
+Tegelijk opent automatisch een nieuw browsertabblad met HubSpot Search, waarbij al op het binnenkomende telefoonnummer wordt gezocht.
+Dat lijkt me voor jouw demo de mooiste oplossing.
+
+Als je wilt, is de volgende stap dat ik je volledige tabs.html aanpas, gebaseerd op exact de versie die je hierboven hebt geplaatst.
+
+
+
+
+
+
+nog 1 vraag als ik dus vaker tussenm de vershcillen tabs in tabs.html van gebruiker wissel dan wordt telekens een nieuwe tab geopend dat lijkt me geen goed idee toch?
+Precies. Als we simpelweg bij iedere klik op CRM window.open(..., "_blank") uitvoeren, krijg je steeds nieuwe browsertabs. Dat willen we niet.
+
+Ik zou het slimmer doen: één vaste HubSpot-zoektab hergebruiken.
+
+Bijvoorbeeld:
+
+
+
+window.open(hubspotSearchUrl, "hubspotSearch");
+ 
+In plaats van:
+
+
+
+window.open(hubspotSearchUrl, "_blank");
+Wat gebeurt er dan?
+Door "hubspotSearch" als vaste naam te gebruiken:
+
+Eerste onbekende beller → nieuwe HubSpot-tab wordt geopend.
+Je gaat terug naar Call History of Terugbelverzoek.
+Volgende onbekende beller → dezelfde HubSpot-tab wordt hergebruikt en krijgt de nieuwe zoek-URL.
+Je eindigt dus niet met 10 HubSpot-tabs.
+Dat past volgens mij perfect bij je demo.
+
+Ik zou zelfs nog één stap verder gaan en in JavaScript een referentie bewaren:
+
+
+
+let hubspotWindow = null;
+ 
+function openHubSpotSearch() {
+ 
+    const hubspotSearchUrl =
+        "https://app-eu1.hubspot.com/search/144113300/search?query="
+        + encodeURIComponent(phone)
+        + "&filters=CONTACT";
+ 
+    if (hubspotWindow && !hubspotWindow.closed) {
+        hubspotWindow.location.href = hubspotSearchUrl;
+        hubspotWindow.focus();
+    } else {
+        hubspotWindow = window.open(
+            hubspotSearchUrl,
+            "hubspotSearch"
+        );
+    }
+}
+Dit geeft precies het gewenste gedrag: maximaal één extra HubSpot-browsertab, die steeds wordt bijgewerkt met het telefoonnummer van de betreffende beller.
+
+Dat zou ik straks in jouw definitieve tabs.html verwerken.
+
+
+
+
+
+
+ik maak de definitieve tabs.html en ook de niet gevinden webpge alsjeblief
+
+Reasoned for 19s
+Ik heb beide definitieve HTML-bestanden gemaakt:
+
+Download tabs.html
+Download niet-gevonden.html
+Verwerkte werking
+Met contactID opent de CRM-tab de juiste HubSpot-timeline.
+Zonder contactID verschijnt niet-gevonden.html in het iframe.
+Tegelijk opent HubSpot Search met het telefoonnummer.
+De vaste vensternaam hubspotSearch zorgt dat dezelfde browsertab wordt hergebruikt.
+De niet-gevonden-pagina bevat ook de knop Open HubSpot opnieuw.
+De bestaande Call History-constructie met historyUrl is behouden.
+historyUrl moet nog steeds de laatste parameter in de URL naar tabs.html zijn.
+Beide bestanden moeten in dezelfde map op je website/GitHub Pages staan.
+
+
+
+
+
+ik kan de links niet downloaden kan je mij de code gewoon geven?
+Jazeker. Hieronder staan beide volledige bestanden. Ik heb de eerdere logica behouden: gevonden contact → HubSpot timeline, geen contact → niet-gevonden-pagina + HubSpot Search in één herbruikbare browsertab.
+
+1. tabs.html
+
+
+
 <!DOCTYPE html>
 <html lang="nl">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
+ 
 <title>Helpdesk Dashboard</title>
-
+ 
 <style>
 body {
     margin: 0;
     font-family: Arial, sans-serif;
 }
-
+ 
 .tabs {
     display: flex;
     align-items: center;
     background: #0078d4;
 }
-
+ 
 .tab {
     padding: 14px 20px;
     color: white;
     cursor: pointer;
+    user-select: none;
 }
-
+ 
 .tab.active {
     background: #005a9e;
     font-weight: bold;
 }
-
+ 
 .spacer {
     flex-grow: 1;
 }
-
+ 
 .open-button {
     margin-right: 10px;
     padding: 8px 12px;
@@ -43,121 +267,305 @@ body {
     color: #0078d4;
     font-weight: bold;
 }
-
+ 
+.open-button:hover {
+    background: #eef6fc;
+}
+ 
 iframe {
     width: 100%;
     height: calc(100vh - 50px);
     border: none;
 }
 </style>
-
+ 
 </head>
-
+ 
 <body>
-
+ 
 <div class="tabs">
-    <div class="tab active" onclick="openTab(1,this)">Call History</div>
-    <div class="tab" onclick="openTab(2,this)">CRM</div>
-    <div class="tab" onclick="openTab(3,this)">Terugbelverzoek</div>
-
+ 
+    <div class="tab active" onclick="openTab(1, this)">
+        Call History
+    </div>
+ 
+    <div class="tab" onclick="openTab(2, this)">
+        CRM
+    </div>
+ 
+    <div class="tab" onclick="openTab(3, this)">
+        Terugbelverzoek
+    </div>
+ 
     <div class="spacer"></div>
-
-    <button class="open-button" onclick="openInNewTab()">
+ 
+    <button
+        type="button"
+        class="open-button"
+        onclick="openInNewTab()">
         ↗ Open in nieuw tabblad
     </button>
+ 
 </div>
-
-<iframe id="contentFrame"></iframe>
-
+ 
+<iframe
+    id="contentFrame"
+    title="Helpdesk-inhoud">
+</iframe>
+ 
 <script>
-
-// URL parameters
+ 
+// ------------------------------------------------------------
+// URL PARAMETERS
+// ------------------------------------------------------------
+ 
 const params = new URLSearchParams(window.location.search);
-
-let phone = params.get("phone") || "";
-const klant = params.get("klant") || "";
-const contactID = params.get("contactID") || "";
-
-
+ 
+let phone = (params.get("phone") || "").trim();
+const contactID = (params.get("contactID") || "").trim();
+ 
+ 
 // ------------------------------------------------------------
 // CALL HISTORY URL
 //
 // Voca kan historyUrl niet URL-encoden.
 // Daarom MOET historyUrl de laatste parameter zijn.
 //
-// We pakken alles achter &historyUrl=.
-// Hierdoor blijven ?ani=, &exp= en &sig= onderdeel
-// van de originele signed URL.
+// Alles achter &historyUrl= wordt daarom rechtstreeks
+// overgenomen.
+//
+// Hierdoor blijven bijvoorbeeld:
+//
+// ?ani=
+// &exp=
+// &sig=
+//
+// onderdeel van de originele signed URL.
 // ------------------------------------------------------------
-
+ 
 let historyUrl = "";
-
+ 
 const historyMarker = "&historyUrl=";
-const historyPosition = window.location.search.indexOf(historyMarker);
-
+ 
+const historyPosition =
+    window.location.search.indexOf(historyMarker);
+ 
 if (historyPosition !== -1) {
+ 
     historyUrl = window.location.search.substring(
         historyPosition + historyMarker.length
     );
 }
-
-
-// Een + in een querystring kan als spatie binnenkomen.
-// Daarom eerst opschonen.
-phone = phone.trim();
-
-// Zorg dat telefoonnummer precies één + heeft
-if (!phone.startsWith("+")) {
+ 
+ 
+// ------------------------------------------------------------
+// TELEFOONNUMMER OPSCHONEN
+// ------------------------------------------------------------
+ 
+if (phone && !phone.startsWith("+")) {
     phone = "+" + phone;
 }
-
-
-// Pagina's voor de drie tabs
+ 
+ 
+// ------------------------------------------------------------
+// HUBSPOT TIMELINE
+//
+// Alleen beschikbaar wanneer we een contactID hebben.
+// ------------------------------------------------------------
+ 
+const hubspotTimelineUrl = contactID
+ 
+    ? "https://app-eu1.hubspot.com/embed/144113300/0-1/"
+        + encodeURIComponent(contactID)
+        + "/timeline"
+ 
+    : "";
+ 
+ 
+// ------------------------------------------------------------
+// HUBSPOT SEARCH
+//
+// Wordt gebruikt wanneer we GEEN contactID hebben.
+//
+// We openen HubSpot dan rechtstreeks met het telefoonnummer
+// als zoekopdracht.
+// ------------------------------------------------------------
+ 
+const hubspotSearchUrl =
+ 
+    "https://app-eu1.hubspot.com/search/144113300/search?query="
+ 
+    + encodeURIComponent(phone)
+ 
+    + "&filters=CONTACT";
+ 
+ 
+// ------------------------------------------------------------
+// GEEN KLANT GEVONDEN PAGINA
+// ------------------------------------------------------------
+ 
+const notFoundUrl =
+ 
+    "niet-gevonden.html?phone="
+ 
+    + encodeURIComponent(phone)
+ 
+    + "&searchUrl="
+ 
+    + encodeURIComponent(hubspotSearchUrl);
+ 
+ 
+// ------------------------------------------------------------
+// POWER APP TERUGBELVERZOEK
+// ------------------------------------------------------------
+ 
+const powerAppUrl =
+ 
+    "https://apps.powerapps.com/play/e/default-b3ad26bd-8476-47a7-b26e-606968902e27/a/ae0f161c-1ae9-4bbc-9f0b-5df6b97d2766"
+ 
+    + "?tenantId=b3ad26bd-8476-47a7-b26e-606968902e27"
+ 
+    + "&hint=b4385edd-e506-4bd2-bd5b-8a549e8dbf9a"
+ 
+    + "&sourcetime=1777451307476"
+ 
+    + "&phone="
+ 
+    + encodeURIComponent(phone);
+ 
+ 
+// ------------------------------------------------------------
+// PAGINA'S VOOR DE DRIE TABS
+// ------------------------------------------------------------
+ 
 const pages = {
-
+ 
     // Voca Call History
-    // Geen hardcoded exp en sig meer.
-    // Gebruik rechtstreeks de signed URL vanuit Voca.
     1: historyUrl,
-
+ 
     // HubSpot
-    2: "https://app-eu1.hubspot.com/embed/144113300/0-1/"
-       + encodeURIComponent(contactID)
-       + "/timeline",
-
-    // Power App terugbelverzoek
-    3: "https://apps.powerapps.com/play/e/default-b3ad26bd-8476-47a7-b26e-606968902e27/a/ae0f161c-1ae9-4bbc-9f0b-5df6b97d2766?tenantId=b3ad26bd-8476-47a7-b26e-606968902e27&hint=b4385edd-e506-4bd2-bd5b-8a549e8dbf9a&sourcetime=1777451307476&phone="
-       + encodeURIComponent(phone)
+    //
+    // Contact gevonden:
+    //      HubSpot timeline
+    //
+    // Geen contact gevonden:
+    //      eigen "niet gevonden" pagina
+    2: contactID
+        ? hubspotTimelineUrl
+        : notFoundUrl,
+ 
+    // Power App
+    3: powerAppUrl
 };
-
-
+ 
+ 
+// ------------------------------------------------------------
+// TAB OPENEN
+// ------------------------------------------------------------
+ 
 function openTab(id, element) {
-
+ 
     document.querySelectorAll(".tab").forEach(tab => {
         tab.classList.remove("active");
     });
-
+ 
     element.classList.add("active");
-
-    document.getElementById("contentFrame").src = pages[id];
-}
-
-
-function openInNewTab() {
-
-    const currentUrl =
-        document.getElementById("contentFrame").src;
-
-    if (currentUrl) {
-        window.open(currentUrl, "_blank");
+ 
+    document.getElementById("contentFrame").src =
+        pages[id];
+ 
+ 
+    // --------------------------------------------------------
+    // CRM ZONDER CONTACT
+    //
+    // Als HubSpot geen contactID heeft teruggegeven:
+    //
+    // 1. De niet-gevonden pagina wordt in het iframe getoond.
+    //
+    // 2. HubSpot Search wordt daarnaast in een apart
+    //    browsertabblad geopend.
+    //
+    // Door de vaste naam "hubspotSearch" te gebruiken,
+    // wordt steeds DEZELFDE browsertab hergebruikt.
+    //
+    // We krijgen dus NIET telkens een nieuw tabblad.
+    // --------------------------------------------------------
+ 
+    if (id === 2 && !contactID) {
+ 
+        window.open(
+            hubspotSearchUrl,
+            "hubspotSearch"
+        );
     }
 }
-
-
-// Standaard Call History openen
-document.getElementById("contentFrame").src = pages[1];
-
+ 
+ 
+// ------------------------------------------------------------
+// HUIDIGE PAGINA LOS OPENEN
+// ------------------------------------------------------------
+ 
+function openInNewTab() {
+ 
+    const currentUrl =
+        document.getElementById("contentFrame").src;
+ 
+    if (currentUrl) {
+ 
+        window.open(
+            currentUrl,
+            "_blank",
+            "noopener"
+        );
+    }
+}
+ 
+ 
+// ------------------------------------------------------------
+// STANDAARD CALL HISTORY OPENEN
+// ------------------------------------------------------------
+ 
+if (pages[1]) {
+ 
+    document.getElementById("contentFrame").src =
+        pages[1];
+}
+ 
 </script>
-
+ 
 </body>
 </html>
+ 
+Console
+
+
+
+Current preview
+Stopped
+RenderError - Iframe unloaded before preview paint
+SecurityValidation - Security validation failed for element: Error: Iframe elements are not allowed
+Console content may be incorrect
+2. niet-gevonden.html
+Zet dit bestand in dezelfde directory als tabs.html.
+
+
+
+
+Plaatsing
+Je GitHub/webdirectory wordt dus simpelweg:
+
+
+
+/
+├── tabs.html
+└── niet-gevonden.html
+En belangrijk voor onze bestaande Voca-constructie: historyUrl blijft de laatste parameter van de URL waarmee Voca tabs.html aanroept. Dat deel heb
+
+
+
+
+Message Copilot
+
+
+
+AI-generated content may be incorrect
