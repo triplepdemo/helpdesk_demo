@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="nl">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0">
+
+<title>Geen klant gevonden</title>
+
+<style>
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+
+    margin: 0;
+
+    min-height: 100vh;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 24px;
+
+    font-family:
+        Arial,
+        sans-serif;
+
+    color: #242424;
+
+    background: #f5f7fa;
+}
+
+
+.card {
+
+    width: 100%;
+    max-width: 560px;
+
+    padding: 40px;
+
+    text-align: center;
+
+    background: #ffffff;
+
+    border-radius: 12px;
+
+    box-shadow:
+        0 8px 24px
+        rgba(0, 0, 0, 0.12);
+}
+
+
+.icon {
+
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    width: 72px;
+    height: 72px;
+
+    margin:
+        0 auto 20px;
+
+    border-radius: 50%;
+
+    font-size: 34px;
+
+    background: #e8f3fb;
+}
+
+
+h1 {
+
+    margin:
+        0 0 12px;
+
+    font-size: 26px;
+}
+
+
+p {
+
+    margin:
+        10px 0;
+
+    line-height: 1.5;
+
+    color: #555;
+}
+
+
+.phone {
+
+    margin:
+        22px 0;
+
+    padding: 12px;
+
+    font-size: 21px;
+
+    font-weight: bold;
+
+    color: #0078d4;
+
+    background: #f2f8fc;
+
+    border-radius: 6px;
+
+    overflow-wrap: anywhere;
+}
+
+
+button {
+
+    margin-top: 16px;
+
+    padding:
+        12px 20px;
+
+    border: none;
+
+    border-radius: 5px;
+
+    cursor: pointer;
+
+    background: #0078d4;
+
+    color: white;
+
+    font-size: 15px;
+
+    font-weight: bold;
+}
+
+
+button:hover {
+
+    background: #005a9e;
+}
+
+
+button:focus-visible {
+
+    outline:
+        3px solid #82c7f5;
+
+    outline-offset: 3px;
+}
+
+</style>
+
+</head>
+
+
+<body>
+
+
+<main class="card">
+
+
+    <div
+        class="icon"
+        aria-hidden="true">
+
+        🔎
+
+    </div>
+
+
+    <h1>
+        Geen klant gevonden
+    </h1>
+
+
+    <p>
+
+        Voor het inkomende telefoonnummer
+        is geen gekoppeld contact gevonden
+        in HubSpot.
+
+    </p>
+
+
+    <div
+        class="phone"
+        id="phone">
+
+        Onbekend telefoonnummer
+
+    </div>
+
+
+    <p>
+
+        HubSpot is in een apart browsertabblad
+        geopend zodat je handmatig verder kunt zoeken.
+
+    </p>
+
+
+    <button
+        type="button"
+        id="openHubSpot">
+
+        Open HubSpot opnieuw
+
+    </button>
+
+
+</main>
+
+
+<script>
+
+// ------------------------------------------------------------
+// PARAMETERS ONTVANGEN UIT tabs.html
+// ------------------------------------------------------------
+
+const params =
+    new URLSearchParams(
+        window.location.search
+    );
+
+
+const phone =
+
+    (
+        params.get("phone")
+        || ""
+    ).trim();
+
+
+const searchUrl =
+
+    params.get("searchUrl")
+
+    ||
+
+    "https://app-eu1.hubspot.com/";
+
+
+// ------------------------------------------------------------
+// TELEFOONNUMMER TONEN
+// ------------------------------------------------------------
+
+if (phone) {
+
+    document
+        .getElementById("phone")
+        .textContent = phone;
+}
+
+
+// ------------------------------------------------------------
+// HUBSPOT HANDMATIG OPNIEUW OPENEN
+//
+// Ook hier gebruiken we "hubspotSearch".
+// Daardoor wordt hetzelfde HubSpot browsertabblad
+// opnieuw gebruikt.
+// ------------------------------------------------------------
+
+document
+    .getElementById("openHubSpot")
+    .addEventListener(
+        "click",
+        function () {
+
+            window.open(
+                searchUrl,
+                "hubspotSearch"
+            );
+        }
+    );
+
+</script>
+
+
+</body>
+
+</html>
