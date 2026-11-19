@@ -71,19 +71,23 @@ iframe {
 
 <script>
 
-// URL parameters
+// URL parameters vanuit Voca
 const params = new URLSearchParams(window.location.search);
 
 let phone = params.get("phone") || "";
 const klant = params.get("klant") || "";
 const contactID = params.get("contactID") || "";
 
+// De volledige, door Python ondertekende Call History URL.
+// URLSearchParams decodeert de als parameter meegegeven URL automatisch.
+const historyUrl = params.get("historyUrl") || "";
+
 // Een + in een querystring kan als spatie binnenkomen.
 // Daarom eerst opschonen.
 phone = phone.trim();
 
-// Zorg dat telefoonnummer precies één + heeft
-if (!phone.startsWith("+")) {
+// Zorg dat telefoonnummer precies één + heeft.
+if (phone && !phone.startsWith("+")) {
     phone = "+" + phone;
 }
 
@@ -91,10 +95,8 @@ if (!phone.startsWith("+")) {
 const pages = {
 
     // Voca Call History
-    1: "https://cb913p73-8000.euw.devtunnels.ms/agent?ani="
-       + encodeURIComponent(phone)
-       + "&exp=1794937821"
-       + "&sig=d257cb1fda8104fea6ae352a9149f67c",
+    // Gebruik exact de signed URL die vanuit Voca wordt meegegeven.
+    1: historyUrl,
 
     // HubSpot
     2: "https://app-eu1.hubspot.com/embed/144113300/0-1/"
@@ -128,7 +130,13 @@ function openInNewTab() {
 }
 
 // Standaard Call History openen
-document.getElementById("contentFrame").src = pages[1];
+if (historyUrl) {
+    document.getElementById("contentFrame").src = historyUrl;
+} else {
+    // Maakt direct zichtbaar wanneer Voca geen historyUrl heeft meegegeven.
+    document.getElementById("contentFrame").srcdoc =
+        "<p style='font-family:Arial;padding:20px;'>Geen historyUrl ontvangen vanuit Voca.</p>";
+}
 
 </script>
 
