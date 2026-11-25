@@ -3,37 +3,37 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
- 
+
 <title>Helpdesk Dashboard</title>
- 
+
 <style>
 body {
     margin: 0;
     font-family: Arial, sans-serif;
 }
- 
+
 .tabs {
     display: flex;
     align-items: center;
     background: #0078d4;
 }
- 
+
 .tab {
     padding: 14px 20px;
     color: white;
     cursor: pointer;
     user-select: none;
 }
- 
+
 .tab.active {
     background: #005a9e;
     font-weight: bold;
 }
- 
+
 .spacer {
     flex-grow: 1;
 }
- 
+
 .open-button {
     margin-right: 10px;
     padding: 8px 12px;
@@ -44,64 +44,64 @@ body {
     color: #0078d4;
     font-weight: bold;
 }
- 
+
 .open-button:hover {
     background: #eef6fc;
 }
- 
+
 iframe {
     width: 100%;
     height: calc(100vh - 50px);
     border: none;
 }
 </style>
- 
+
 </head>
- 
+
 <body>
- 
+
 <div class="tabs">
- 
+
     <div class="tab active" onclick="openTab(2, this)">
         CRM
     </div>
- 
+
     <div class="tab" onclick="openTab(1, this)">
         Call History
     </div>
- 
+
     <div class="tab" onclick="openTab(3, this)">
         Terugbelverzoek
     </div>
- 
+
     <div class="spacer"></div>
- 
+
     <button
         type="button"
         class="open-button"
         onclick="openInNewTab()">
         ↗ Open in nieuw tabblad
     </button>
- 
+
 </div>
- 
+
 <iframe
     id="contentFrame"
     title="Helpdesk-inhoud">
 </iframe>
- 
+
 <script>
- 
+
 // ------------------------------------------------------------
 // URL PARAMETERS
 // ------------------------------------------------------------
- 
+
 const params = new URLSearchParams(window.location.search);
- 
+
 let phone = (params.get("phone") || "").trim();
 const contactID = (params.get("contactID") || "").trim();
- 
- 
+
+
 // ------------------------------------------------------------
 // CALL HISTORY URL
 //
@@ -119,46 +119,46 @@ const contactID = (params.get("contactID") || "").trim();
 //
 // onderdeel van de originele signed URL.
 // ------------------------------------------------------------
- 
+
 let historyUrl = "";
- 
+
 const historyMarker = "&historyUrl=";
- 
+
 const historyPosition =
     window.location.search.indexOf(historyMarker);
- 
+
 if (historyPosition !== -1) {
- 
+
     historyUrl = window.location.search.substring(
         historyPosition + historyMarker.length
     );
 }
- 
- 
+
+
 // ------------------------------------------------------------
 // TELEFOONNUMMER OPSCHONEN
 // ------------------------------------------------------------
- 
+
 if (phone && !phone.startsWith("+")) {
     phone = "+" + phone;
 }
- 
- 
+
+
 // ------------------------------------------------------------
 // HUBSPOT TIMELINE
 //
 // Alleen beschikbaar wanneer we een contactID hebben.
 // ------------------------------------------------------------
- 
+
 const hubspotTimelineUrl = contactID
- 
+
     ? "https://app-eu1.hubspot.com/embed/144113300/0-1/"
         + encodeURIComponent(contactID)
         + "/timeline"
- 
+
     : "";
- 
- 
+
+
 // ------------------------------------------------------------
 // HUBSPOT SEARCH
 //
@@ -167,59 +167,59 @@ const hubspotTimelineUrl = contactID
 // We openen HubSpot dan rechtstreeks met het telefoonnummer
 // als zoekopdracht.
 // ------------------------------------------------------------
- 
+
 const hubspotSearchUrl =
- 
+
     "https://app-eu1.hubspot.com/search/144113300/search?query="
- 
+
     + encodeURIComponent(phone)
- 
+
     + "&filters=CONTACT";
- 
- 
+
+
 // ------------------------------------------------------------
 // GEEN KLANT GEVONDEN PAGINA
 // ------------------------------------------------------------
- 
+
 const notFoundUrl =
- 
+
     "niet-gevonden.html?phone="
- 
+
     + encodeURIComponent(phone)
- 
+
     + "&searchUrl="
- 
+
     + encodeURIComponent(hubspotSearchUrl);
- 
- 
+
+
 // ------------------------------------------------------------
 // POWER APP TERUGBELVERZOEK
 // ------------------------------------------------------------
- 
+
 const powerAppUrl =
- 
+
     "https://apps.powerapps.com/play/e/default-b3ad26bd-8476-47a7-b26e-606968902e27/a/ae0f161c-1ae9-4bbc-9f0b-5df6b97d2766"
- 
+
     + "?tenantId=b3ad26bd-8476-47a7-b26e-606968902e27"
- 
+
     + "&hint=b4385edd-e506-4bd2-bd5b-8a549e8dbf9a"
- 
+
     + "&sourcetime=1777451307476"
- 
+
     + "&phone="
- 
+
     + encodeURIComponent(phone);
- 
- 
+
+
 // ------------------------------------------------------------
 // PAGINA'S VOOR DE DRIE TABS
 // ------------------------------------------------------------
- 
+
 const pages = {
- 
+
     // Voca Call History
     1: historyUrl,
- 
+
     // HubSpot
     //
     // Contact gevonden:
@@ -230,28 +230,28 @@ const pages = {
     2: contactID
         ? hubspotTimelineUrl
         : notFoundUrl,
- 
+
     // Power App
     3: powerAppUrl
 };
- 
- 
+
+
 // ------------------------------------------------------------
 // TAB OPENEN
 // ------------------------------------------------------------
- 
+
 function openTab(id, element) {
- 
+
     document.querySelectorAll(".tab").forEach(tab => {
         tab.classList.remove("active");
     });
- 
+
     element.classList.add("active");
- 
+
     document.getElementById("contentFrame").src =
         pages[id];
- 
- 
+
+
     // --------------------------------------------------------
     // CRM ZONDER CONTACT
     //
@@ -267,28 +267,28 @@ function openTab(id, element) {
     //
     // We krijgen dus NIET telkens een nieuw tabblad.
     // --------------------------------------------------------
- 
+
     if (id === 2 && !contactID) {
- 
+
         window.open(
             hubspotSearchUrl,
             "hubspotSearch"
         );
     }
 }
- 
- 
+
+
 // ------------------------------------------------------------
 // HUIDIGE PAGINA LOS OPENEN
 // ------------------------------------------------------------
- 
+
 function openInNewTab() {
- 
+
     const currentUrl =
         document.getElementById("contentFrame").src;
- 
+
     if (currentUrl) {
- 
+
         window.open(
             currentUrl,
             "_blank",
@@ -296,19 +296,22 @@ function openInNewTab() {
         );
     }
 }
- 
- 
+
+
 // ------------------------------------------------------------
-// STANDAARD CALL HISTORY OPENEN
+// STANDAARD CRM OPENEN
+//
+// Gebruik dezelfde openTab()-functie als bij handmatig klikken
+// op de CRM-tab.
 // ------------------------------------------------------------
- 
-if (pages[1]) {
- 
-    document.getElementById("contentFrame").src =
-        pages[1];
+
+const defaultTab = document.querySelector(".tab.active");
+
+if (defaultTab) {
+    openTab(2, defaultTab);
 }
- 
+
 </script>
- 
+
 </body>
 </html>
